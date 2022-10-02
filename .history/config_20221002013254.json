@@ -1,0 +1,10 @@
+{
+    "concurrency" : 5,
+    "apis" : [
+        {
+            "type": "get",
+            "url" : "google.com",
+            "headers" :[{"attribute":"Accept","value":"application-json"}]
+        }
+    ]
+}
