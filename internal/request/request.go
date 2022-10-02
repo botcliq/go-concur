@@ -2,6 +2,7 @@ package request
 
 import (
 	"fmt"
+	"go-concur/internal/csvlog"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -33,5 +34,7 @@ func Get(u string, n int) error {
 	latency := respTime.Sub(reqTime)
 	size := len(b)
 	fmt.Printf("Fetched the url for task %d, url %s with size %d and latency %f \n", n, getURL, size, latency.Seconds())
+
+	csvlog.LogCsv("result.csv", []string{string(n), u, string(size), reqTime.String(), respTime.String(), latency.String()})
 	return err
 }
