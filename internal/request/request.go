@@ -1,6 +1,7 @@
 package request
 
 import (
+	"crypto/tls"
 	"fmt"
 	"go-concur/internal/csvlog"
 	"io/ioutil"
@@ -10,21 +11,29 @@ import (
 	"time"
 )
 
-func Get(u string, n int) error {
+func Get(r Apis, n string) error {
 	// Build fileName from fullPath
-	getURL, err := url.Parse(u)
+	getURL, err := url.Parse(r.Url)
 	if err != nil {
 		log.Fatal(err)
 	}
-	client := http.Client{
+	tr := &http.Transport{
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+	}
+	client := http.Client{Transport: tr,
 		CheckRedirect: func(r *http.Request, via []*http.Request) error {
 			r.URL.Opaque = r.URL.Path
 			return nil
 		},
 	}
+	req, err := http.NewRequest(r.Type, r.Url, nil)
+	for _, v := range r.Headers {
+		req.Header.Add(v.Attr, v.Value)
+	}
 	reqTime := time.Now()
+	resp, err := client.Do(req)
+	defer resp.Body.Close()
 	// Put content on file
-	resp, err := client.Get(u)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -33,8 +42,8 @@ func Get(u string, n int) error {
 	b, _ := ioutil.ReadAll(resp.Body)
 	latency := respTime.Sub(reqTime)
 	size := len(b)
-	fmt.Printf("Fetched the url for task %d, url %s with size %d and latency %f \n", n, getURL, size, latency.Seconds())
+	fmt.Printf("Fetched the url for task %s, url %s with size %d and latency %f \n", n, getURL, size, latency.Seconds())
 
-	csvlog.LogCsv("result.csv", []string{string(n), u, string(size), reqTime.String(), respTime.String(), latency.String()})
+	csvlog.LogCsv("result.csv", []string{n, r.Url, string(size), reqTime.String(), respTime.String(), latency.String()})
 	return err
 }

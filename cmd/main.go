@@ -28,15 +28,14 @@ func main() {
 	var res map[string]interface{}
 	json.Unmarshal([]byte(byteResult), &res)
 
+	tasks := []*worker.Task{}
 	fmt.Println(config)
+	for i := 0; i < config.Total; i++ {
+		for j := 0; j < len(config.Apis); j++ {
+			tasks = append(tasks, worker.NewTask(request.Get, config.Apis[j], fmt.Sprintf("user%d:api %d", i, j)))
 
-	tasks := []*worker.Task{
-		worker.NewTask(request.Get, config.Apis[0].Url, 0),
-		worker.NewTask(request.Get, config.Apis[0].Url, 1),
-		worker.NewTask(request.Get, config.Apis[0].Url, 2),
-		worker.NewTask(request.Get, config.Apis[0].Url, 3),
-		worker.NewTask(request.Get, config.Apis[0].Url, 4),
-		worker.NewTask(request.Get, config.Apis[0].Url, 5),
+		}
+
 	}
 
 	p := worker.NewPool(tasks, config.Concurrency)

@@ -1,9 +1,14 @@
 {
     "concurrency" : 2,
+    "total_requests": 10,
     "apis" : [
         {
             "type": "get",
-            "url" : "http://google.com",
+            "url" : "https://google.com",
+            "headers" :[{"attribute":"Accept","value":"application-json"}]
+        },{
+            "type": "get",
+            "url" : "https://apple.com",
             "headers" :[{"attribute":"Accept","value":"application-json"}]
         }
     ]
